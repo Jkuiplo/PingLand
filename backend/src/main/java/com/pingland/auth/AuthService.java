@@ -22,8 +22,19 @@ public class AuthService {
         if (MockData.USERS.stream().anyMatch(u -> u.email().equals(request.email()))) {
             throw new RuntimeException("Email is already taken");
         }
-        UserDto user = new UserDto(MockData.USERS.getLast().id()+1, request.email(), request.nickname(), request.password());
+        if (MockData.USERS.stream().anyMatch(u -> u.username().equals(request.username()))) {
+            throw new RuntimeException("Username is already taken");
+        }
+
+        UserDto user = new UserDto(nextUserId(), request.email(), request.username(), request.nickname(), request.password());
         MockData.USERS.add(user);
         return new SignupResponse("fake-token-" + user.id(), user);
+    }
+
+    private Long nextUserId() {
+        return MockData.USERS.stream()
+                .mapToLong(UserDto::id)
+                .max()
+                .orElse(0L) + 1;
     }
 }
